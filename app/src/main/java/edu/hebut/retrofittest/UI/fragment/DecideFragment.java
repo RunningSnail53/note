@@ -19,9 +19,6 @@ public class DecideFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = LayoutInflater.from(getContext()).inflate(R.layout.fragment_decide, null);
-
-        SupabaseClient client = SupabaseDataUtils.Companion.getClient();
         return v;
-
     }
 }

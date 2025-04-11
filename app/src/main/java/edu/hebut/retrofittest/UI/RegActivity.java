@@ -16,6 +16,7 @@ import edu.hebut.retrofittest.Bean.UserBean;
 import edu.hebut.retrofittest.R;
 import edu.hebut.retrofittest.Util.EditTextClearTools;
 import edu.hebut.retrofittest.Util.SPUtils;
+import edu.hebut.retrofittest.supabase.entity.User;
 
 public class RegActivity extends AppCompatActivity {
     private EditText userName,passWord,rePassword;
@@ -66,6 +67,8 @@ public class RegActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"该用户已被注册，请重新输入",Toast.LENGTH_LONG).show();
                     userName.requestFocus();
                 }else{
+                    User user = new User(0 ,username, password);
+
                     SPUtils.insertUser(username,password,RegActivity.this);
                     Toast.makeText(getApplicationContext(),"用户注册成功，请前往登录",Toast.LENGTH_LONG).show();
                     Intent intent = new Intent(getApplicationContext(), LoginActivity.class);

@@ -1,4 +1,4 @@
-package edu.hebut.ActivityLifeCycle.supabaseUtil.entity
+package edu.hebut.retrofittest.supabase.entity
 
 import kotlinx.serialization.Serializable
 
