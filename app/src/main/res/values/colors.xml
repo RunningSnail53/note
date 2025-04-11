@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6C73DC</color>
+    <color name="colorPrimaryDark">#6C73DC</color>
+    <color name="colorAccent">#6C73DC</color>
+    <color name="colorFloatingActionButton">#00AAFF</color>
+    <color name="colorSplashBackground">#00AAFF</color>
+    <color name="colorLogin">#0000FF</color>
+    <color name="colorLoginButton">#0000FF</color>
+    <color name="colorCursor">#cccccc</color>
+    <color name="head_color">#FFDDFF</color>
+    <color name="information_title_color">#666666</color>
+    <color name="list_bg_color">#FFF4F4F4</color>
+    <color name="list_focus_color">#bdbdbd</color>
+    <color name="logoScreenBackground">#F7F7F7</color>
+    <color name="content_background">#f2f2f2</color>
+    <color name="my_text">#ff000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <drawable name="checkbox">#666666</drawable>
+    <drawable name="camera_back_press">#1b1b1b</drawable>
+    <drawable name="camera_back_default">#2f2f2f</drawable>
+
+    <!-- Grey-->
+    <color name="grey_000">#FFFFFF</color>
+    <color name="grey_050">#FAFAFA</color>
+    <color name="grey_100">#F5F5F5</color>
+    <color name="grey_200">#EEEEEE</color>
+    <color name="grey_300">#E0E0E0</color>
+    <color name="grey_400">#BDBDBD</color>
+    <color name="grey_500">#9E9E9E</color>
+    <color name="grey_600">#757575</color>
+    <color name="grey_700">#616161</color>
+    <color name="grey_800">#424242</color>
+    <color name="grey_900">#212121</color>
+
+    <color name="primaryText">#2A004F</color>
+    <color name="secondaryText">#757575</color>
+    <color name="hintPurple">#9575CD</color>
+    <color name="dividerPurple">#B39DDB</color>
+    <color name="linkPurple">#7E57C2</color>
+    <color name="cursorPurple">#7E57C2</color>
+
+    <color name="purplePrimary">#7E57C2</color>
+    <color name="purpleSecondary">#B39DDB</color>
+    <color name="purpleRipple">#40D1C4E9</color>
+
+    <color name="edittext_hint">#9575CD</color>
+
+    <color name="nav_active">#7E57C2</color>
+    <color name="nav_inactive">#B39DDB</color>
+
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+
+
+
+
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="note_type">
+        <item>默认记事</item>
+        <item>学习记事</item>
+        <item>生活记事</item>
+        <item>消费记事</item>
+        <item>其他记事</item>
+    </string-array>
+    <string-array name="note_weather">
+        <item>选择天气</item>
+        <item>晴天</item>
+        <item>阴天</item>
+        <item>雨天</item>
+        <item>雪天</item>
+        <item>大风</item>
+    </string-array>
+    <string-array name="note_mind">
+        <item>开心</item>
+        <item>无感</item>
+        <item>疲惫</item>
+        <item>焦虑</item>
+        <item>愤怒</item>
+        <item>哀伤</item>
+    </string-array>
+    <declare-styleable name="GroupRecyclerView">
+        <attr name="group_height" format="dimension" />
+        <attr name="group_child_offset" format="dimension" />
+        <attr name="group_background" format="color" />
+        <attr name="group_text_color" format="color" />
+        <attr name="group_text_size" format="dimension" />
+        <attr name="group_center" format="boolean" />
+        <attr name="group_padding_left" format="dimension" />
+        <attr name="group_padding_right" format="dimension" />
+        <attr name="group_has_header" format="boolean" />
+    </declare-styleable>
+
+</resources>

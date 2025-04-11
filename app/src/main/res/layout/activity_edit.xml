@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_new"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_gradient"
+    android:fitsSystemWindows="true">
+
+    <!-- 季节背景图 -->
+    <ImageView
+        android:id="@+id/ivSeason"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:alpha="0.3"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/winter"
+        android:contentDescription="季节背景"
+        android:layout_marginTop="?android:attr/actionBarSize"/>
+
+    <!-- 主内容容器 -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        android:paddingHorizontal="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:divider="@drawable/list_divider"
+            android:showDividers="beginning">
+
+            <!-- 标题输入 -->
+            <EditText
+                android:id="@+id/et_new_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginHorizontal="0dp"
+                android:background="@drawable/edittext_bg"
+                android:textColorHint="@color/edittext_hint"
+                android:letterSpacing="0.03"
+                android:hint="请输入标题"
+                android:maxLines="1"
+                android:textColor="@color/primaryText"
+                android:textSize="18sp"
+                android:padding="12dp"/>
+
+            <!-- 状态选择行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                android:divider="@drawable/list_divider"
+                android:showDividers="middle">
+
+                <Spinner
+                    android:id="@+id/spWeather"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/spinner_bg"
+                    android:popupBackground="@drawable/list_background"
+                    android:spinnerMode="dropdown"
+                    android:entries="@array/note_weather"/>
+
+                <Spinner
+                    android:id="@+id/spMind"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/spinner_bg"
+                    android:popupBackground="@drawable/list_background"
+                    android:spinnerMode="dropdown"
+                    android:entries="@array/note_mind"/>
+
+                <Spinner
+                    android:id="@+id/type_select"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/spinner_bg"
+                    android:popupBackground="@drawable/list_background"
+                    android:spinnerMode="dropdown"
+                    android:entries="@array/note_type"/>
+            </LinearLayout>
+
+            <!-- 内容编辑区 -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/list_background">
+
+                <ImageView
+                    android:id="@+id/ivMind"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_centerInParent="true"
+                    android:alpha="0.5"
+                    android:src="@mipmap/mind0"/>
+
+                <EditText
+                    android:id="@+id/et_new_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:hint="请输入内容"
+                    android:padding="16dp"
+                    android:textColor="@color/primaryText"
+                    android:textSize="16sp"/>
+            </RelativeLayout>
+
+            <!-- 链接区域 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical"
+                android:background="@drawable/list_background"
+                android:padding="12dp">
+
+                <EditText
+                    android:id="@+id/edtLink"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="输入链接"
+                    android:textColor="@color/primaryText"
+                    android:textSize="14sp"/>
+
+                <TextView
+                    android:id="@+id/tvLink"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/secondaryText"
+                    android:textSize="14sp"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+            <!-- 操作按钮组 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:divider="@drawable/list_divider"
+                android:showDividers="middle">
+
+                <Button
+                    android:id="@+id/btnRecord"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bg"
+                    android:text="录制语音"
+                    android:textColor="@android:color/white"/>
+
+                <Button
+                    android:id="@+id/btnPlay"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bg"
+                    android:text="播放语音"
+                    android:visibility="gone"
+                    android:textColor="@android:color/white"/>
+            </LinearLayout>
+
+            <!-- 音乐操作组 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:divider="@drawable/list_divider"
+                android:showDividers="middle">
+
+                <Button
+                    android:id="@+id/btnSelectMusic"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bg"
+                    android:text="选择音乐"
+                    android:textColor="@android:color/white"/>
+
+                <Button
+                    android:id="@+id/btnPlayMusic"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_bg"
+                    android:text="播放音乐"
+                    android:visibility="gone"
+                    android:textColor="@android:color/white"/>
+            </LinearLayout>
+
+        <view class="androidx.recyclerview.widget.RecyclerView"
+            android:id="@+id/rvPic"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp" />
+    </LinearLayout>
+    </ScrollView>
+</LinearLayout>

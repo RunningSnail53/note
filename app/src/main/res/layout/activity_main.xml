@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    tools:openDrawer="start">
+
+    <!-- 主内容区域 -->
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/vpMain"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- 底部导航 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@drawable/bottom_nav_bg"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvNote"
+            style="@style/BottomNavItem"
+            android:text="写日记"
+            android:drawableTop="@drawable/ic_note_selector"/>
+
+        <TextView
+            android:id="@+id/tvAnalysis"
+            style="@style/BottomNavItem"
+            android:text="情绪分析"
+            android:drawableTop="@drawable/ic_analysis_selector"/>
+
+        <TextView
+            android:id="@+id/tvDevice"
+            style="@style/BottomNavItem"
+            android:text="决策辅助"
+            android:drawableTop="@drawable/ic_device_selector"/>
+
+        <TextView
+            android:id="@+id/tvMoment"
+            style="@style/BottomNavItem"
+            android:text="一键分享"
+            android:drawableTop="@drawable/ic_share_selector"/>
+    </LinearLayout>
+</LinearLayout>
