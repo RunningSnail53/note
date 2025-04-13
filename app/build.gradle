@@ -64,6 +64,10 @@ dependencies {
     //Picasso
     implementation "com.squareup.picasso:picasso:2.71828"
 
+    // MPAndroidChart
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // OkHttp Supabase
     implementation(platform("io.github.jan-tennert.supabase:bom:3.1.4"))
     implementation("io.ktor:ktor-client-android:3.1.2")
     implementation("io.github.jan-tennert.supabase:postgrest-kt:3.1.4")
@@ -72,5 +76,6 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:realtime-kt:3.1.4")
     implementation("io.github.jan-tennert.supabase:storage-kt:3.1.4")
     implementation 'com.google.firebase:firebase-firestore:25.1.3'
+
 
 }
