@@ -37,7 +37,7 @@ interface SupabaseStorageApi {
     ): Call<ResponseBody>
 
     @POST("/storage/v1/object/{bucketName}/{fileName}")
-    @Headers("Content-Type: application/octet-stream")
+    @Headers("Content-Type: image/png")
     fun uploadImage(
         @Header("Authorization") authorization: String,
         @Path("bucketName") bucketName: String,
@@ -102,7 +102,7 @@ class SupabaseStorageService {
             return null
         }
 
-        val requestBody = file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
+        val requestBody = file.asRequestBody("image/png".toMediaTypeOrNull())
         val call = storageApi.uploadImage(getAuthHeader(), bucketName, fileName, requestBody)
         val response = call.execute()
 

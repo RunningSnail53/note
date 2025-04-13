@@ -56,7 +56,13 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:4.16.0"
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
-    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.core:core-ktx:1.13.0'
+
+    // ChatKit组件
+    implementation 'com.github.stfalcon-studio:Chatkit:v0.4.1'
+
+    //Picasso
+    implementation "com.squareup.picasso:picasso:2.71828"
 
     implementation(platform("io.github.jan-tennert.supabase:bom:3.1.4"))
     implementation("io.ktor:ktor-client-android:3.1.2")
@@ -65,5 +71,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     implementation("io.github.jan-tennert.supabase:realtime-kt:3.1.4")
     implementation("io.github.jan-tennert.supabase:storage-kt:3.1.4")
+    implementation 'com.google.firebase:firebase-firestore:25.1.3'
 
 }
