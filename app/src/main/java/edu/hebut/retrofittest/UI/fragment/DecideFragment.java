@@ -67,10 +67,10 @@ public class DecideFragment extends Fragment implements MessagesListAdapter.OnLo
         MessageInput input = fgDecide.findViewById(R.id.input);
 
         //发送输入框中的文本，addToStart的第二个参数是列表滚动到底部
-        input.setInputListener(input1 -> {
-            Message message = new Message(USER_ID, mUser, input1.toString());
+        input.setInputListener(ipt -> {
+            Message message = new Message(USER_ID, mUser, ipt.toString());
             mMessagesListAdapter.addToStart(message, true);
-            sendMessageToServer("0", input1.toString());
+            sendMessageToServer("0", ipt.toString());
             return true;
         });
 
