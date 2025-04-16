@@ -1,5 +1,7 @@
 package edu.hebut.retrofittest.UI;
 
+import static java.lang.Math.abs;
+
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,10 +14,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import edu.hebut.retrofittest.Bean.UserBean;
 import edu.hebut.retrofittest.R;
 import edu.hebut.retrofittest.Util.EditTextClearTools;
-import edu.hebut.retrofittest.Util.SPUtils;
+import edu.hebut.retrofittest.supabase.dao.UserDao;
 import edu.hebut.retrofittest.supabase.entity.User;
 
 public class RegActivity extends AppCompatActivity {
@@ -48,9 +49,9 @@ public class RegActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final String username=userName.getText().toString();
-                final String password=passWord.getText().toString();
-                final String repassword=rePassword.getText().toString();
+                final String username=userName.getText().toString().trim();
+                final String password=passWord.getText().toString().trim();
+                final String repassword=rePassword.getText().toString().trim();
                 if(username.isEmpty()){
                     Toast.makeText(getApplicationContext(),"帐号不能为空",Toast.LENGTH_LONG).show();
                     return;
@@ -62,21 +63,27 @@ public class RegActivity extends AppCompatActivity {
                     return;
                 }
 
-                UserBean userBean = SPUtils.query(username.trim(), password.trim(),RegActivity.this);
-                if (userBean!=null) {
-                    Toast.makeText(getApplicationContext(),"该用户已被注册，请重新输入",Toast.LENGTH_LONG).show();
-                    userName.requestFocus();
-                }else{
-                    User user = new User(0 ,username, password);
-
-                    SPUtils.insertUser(username,password,RegActivity.this);
-                    Toast.makeText(getApplicationContext(),"用户注册成功，请前往登录",Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                    startActivity(intent);
-                    finish();
-                    overridePendingTransition(R.anim.push_right_out, R.anim.push_right_in);
-                }
-
+//                UserBean userBean = SPUtils.query(username.trim(), password.trim(),RegActivity.this);
+                UserDao.Companion.getUserByName(username).thenAccept(
+                        user -> {
+                            if (user != null) {
+                                runOnUiThread(()->{
+                                    Toast.makeText(getApplicationContext(),"该用户已被注册，请重新输入",Toast.LENGTH_LONG).show();
+                                    userName.requestFocus();
+                                });
+                            }else{
+                                    User usr = new User(null, username, password);
+                                    UserDao.Companion.insertUser(usr);
+                                runOnUiThread(()->{
+                                    Toast.makeText(getApplicationContext(),"用户注册成功，请前往登录",Toast.LENGTH_LONG).show();
+                                    Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                    overridePendingTransition(R.anim.push_right_out, R.anim.push_right_in);
+                                });
+                            }
+                        }
+                );
             }
         });
     }

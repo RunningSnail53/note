@@ -1,0 +1,5 @@
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.147.20.235</domain> <!-- 允许特定IP -->
+    </domain-config>
+</network-security-config>

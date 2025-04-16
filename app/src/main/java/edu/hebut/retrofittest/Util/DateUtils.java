@@ -3,6 +3,10 @@ package edu.hebut.retrofittest.Util;
 import android.icu.util.ChineseCalendar;
 import android.os.Build;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class DateUtils {
     public static String getLunarDate(long timestamp) {
         ChineseCalendar chineseCalendar = null;
@@ -20,5 +24,26 @@ public class DateUtils {
             return lunarYear + "-" + lunarMonth + "-" + lunarDay;
         }
         return "";
+    }
+
+    public static Date valueOf(String date) {
+        if (date == null || date.trim().isEmpty()) {
+            return null;
+        }
+
+        // 支持两种格式：1."2025-3-1"  2."2025-03-01"
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-M-d");
+
+        try {
+            return format.parse(date);
+        } catch (ParseException e) {
+            // 解析失败时尝试带前导零的格式（容错处理）
+            try {
+                format = new SimpleDateFormat("yyyy-MM-dd");
+                return format.parse(date);
+            } catch (ParseException ex) {
+                return null;
+            }
+        }
     }
 }

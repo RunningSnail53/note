@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- 椭圆效果 -->
+    <corners android:radius="24dp"/>  <!-- 高度48dp时，24dp半径即形成椭圆 -->
+
+    <!-- 背景颜色 -->
+    <solid android:color="@color/purplePrimary"/>
+
+    <!-- 点击水波纹效果 -->
+    <ripple
+        android:color="@color/purpleRipple"
+        android:radius="24dp"/>
+
+</shape>

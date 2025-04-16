@@ -26,6 +26,7 @@ import edu.hebut.retrofittest.Adapter.PicAdapter;
 import edu.hebut.retrofittest.Bean.NoteBean;
 import edu.hebut.retrofittest.DB.NoteDao;
 import edu.hebut.retrofittest.R;
+
 import com.yanzhenjie.album.AlbumFile;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class NoteActivity extends AppCompatActivity {
     private TextView tvTitle;
     private TextView tv_note_content;//记事内容
     private NoteBean note;//记事对象
-    private TextView  tvUpdateTime;
+    private TextView tvUpdateTime;
     private PicAdapter adapter;
     private String myTitle;
     private String myContent;
@@ -52,13 +53,14 @@ public class NoteActivity extends AppCompatActivity {
 
     private String mOutputFilePath;
     private ProgressDialog loadingDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
         init();
         initEvent();
-        btnPlayMusic.performClick();
+//        btnPlayMusic.performClick();
     }
 
     private void initEvent() {
@@ -67,7 +69,7 @@ public class NoteActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String url = tvLink.getText().toString().trim(); // 要打开的链接地址
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                startActivity(Intent.createChooser(intent,"请选择浏览器"));
+                startActivity(Intent.createChooser(intent, "请选择浏览器"));
             }
         });
         btnPlayMusic.setOnClickListener(new View.OnClickListener() {
@@ -75,9 +77,9 @@ public class NoteActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (btnPlayMusic.getTag() == null) {
                     playMusic();
-                   btnPlayMusic.setTag(1);
-                   btnPlayMusic.setText("停止播放");
-                }else {
+                    btnPlayMusic.setTag(1);
+                    btnPlayMusic.setText("停止播放");
+                } else {
                     stopMusic();
                     btnPlayMusic.setTag(null);
                     btnPlayMusic.setText("播放音乐");
@@ -118,7 +120,7 @@ public class NoteActivity extends AppCompatActivity {
         if (musicRawId == 0) {
             return;
         }
-        mediaPlayer = MediaPlayer.create(this, musicRawId);
+        mediaPlayer = MediaPlayer.create(this, 1);
         mediaPlayer.start();
     }
 
@@ -129,12 +131,13 @@ public class NoteActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     private void init() {
         btnPlayRecord = findViewById(R.id.btnPlay);
         btnPlayMusic = findViewById(R.id.btnPlayMusic);
         tvUpdateTime = findViewById(R.id.tvUpdate);
         tvLink = findViewById(R.id.tvLink);
-        noteDao = new NoteDao(this);
+        noteDao = new NoteDao();
         adapter = new PicAdapter(this);
         tvTitle = findViewById(R.id.tvTitle);
         rvData = findViewById(R.id.rvData);
@@ -163,12 +166,12 @@ public class NoteActivity extends AppCompatActivity {
         musicRawId = note.getMusicId();
         myTitle = note.getTitle();
         myContent = note.getContent();
-        myCreate_time=note.getCreateTime();
+        myCreate_time = note.getCreateTime();
         mOutputFilePath = note.getRecordPath();
         tvTitle.setText(myTitle);
         tv_note_content.setText(myContent);
         tvLink.setText(note.getLink());
-        tvUpdateTime.setText(note.getUpdateTime()==null?"":"创建（修改）时间：" + note.getUpdateTime());
+        tvUpdateTime.setText(note.getUpdateTime() == null ? "" : "创建（修改）时间：" + note.getUpdateTime());
         if (note.getMusicId() != 0) {
             btnPlayMusic.setVisibility(View.VISIBLE);
         }
@@ -178,7 +181,8 @@ public class NoteActivity extends AppCompatActivity {
                 AlbumFile albumFile = new AlbumFile();
                 albumFile.setPath(note.getPicPaths().get(k));
                 list.add(albumFile);
-            };
+            }
+            ;
             adapter.setNewData(list);
         } catch (Exception e) {
             e.printStackTrace();
@@ -219,11 +223,15 @@ public class NoteActivity extends AppCompatActivity {
                     .setMessage("确定删除记事？")
                     .setCancelable(false)
                     .setPositiveButton("确定", (dialog, which) -> {
-                        int ret = noteDao.DeleteNote(note.getId());
-                        if (ret > 0) {
-                            Toast.makeText(NoteActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
+                        noteDao.deleteNote(Long.valueOf(note.getId())).thenAccept(
+                                ret -> {
+                                    runOnUiThread(()->{
+                                        Toast.makeText(NoteActivity.this, "删除成功", Toast.LENGTH_SHORT).show();
+                                        finish();
+                                    });
+
+                                }
+                        );
                     })
                     .setNegativeButton("取消", null)
                     .create()

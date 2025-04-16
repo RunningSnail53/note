@@ -427,7 +427,7 @@ public class EditActivity extends AppCompatActivity {
         if (note == null) {
             note = new NoteBean();
         }
-        noteDao = new NoteDao(this);
+        noteDao = new NoteDao();
         note.setTitle(noteTitle);
         note.setContent(noteContent);
 
@@ -522,3 +522,4 @@ public class EditActivity extends AppCompatActivity {
         }
     }
 }
+

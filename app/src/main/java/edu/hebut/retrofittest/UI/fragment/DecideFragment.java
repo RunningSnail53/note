@@ -1,7 +1,6 @@
 package edu.hebut.retrofittest.UI.fragment;
 
 
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -12,19 +11,30 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
-import edu.hebut.retrofittest.Bean.Message;
-import edu.hebut.retrofittest.Bean.User;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.hebut.retrofittest.R;
-import edu.hebut.retrofittest.Util.EnCodeUtils;
-import edu.hebut.retrofittest.assistant.client.RetrofitClient;
-import edu.hebut.retrofittest.assistant.entity.ChatRequest;
-import edu.hebut.retrofittest.assistant.entity.ChatResponse;
-import edu.hebut.retrofittest.assistant.service.ChatApi;
+import edu.hebut.retrofittest.Util.SharedDataUtils;
+import edu.hebut.retrofittest.chat.client.RetrofitClient;
+import edu.hebut.retrofittest.chat.model.Message;
+import edu.hebut.retrofittest.chat.model.User;
+import edu.hebut.retrofittest.chat.service.ChatApi;
+import io.noties.markwon.Markwon;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DecideFragment extends Fragment implements MessagesListAdapter.OnLoadMoreListener {
 
@@ -34,7 +44,12 @@ public class DecideFragment extends Fragment implements MessagesListAdapter.OnLo
 
     private User mUser;
     private User mAiAssistant;
-    private MessagesListAdapter<Message> mMessagesListAdapter;
+
+    private ChatApi chatApi;
+    MessagesListAdapter<Message> mMessagesListAdapter;
+    private MessagesList messagesList;
+    private MessageInput input;
+    private Markwon markwon;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,12 +59,14 @@ public class DecideFragment extends Fragment implements MessagesListAdapter.OnLo
 
         mAiAssistant = new User(AI_ASSISTANT_ID, "AiAssistant", AI_ASSISTANT_AVATAR, true);
 
+        chatApi = RetrofitClient.getInstance().create(ChatApi.class);
+
         /*
          * senderId:自己的id，用于区分自己和对方，控制消息气泡的位置。
          * imageLoader:图像加载器
          *
          * */
-        mMessagesListAdapter = new MessagesListAdapter<>(USER_ID, (imageView, url, payload) -> Picasso.get().load(url).into(imageView));
+        mMessagesListAdapter = new MessagesListAdapter<Message>(USER_ID, (imageView, url, payload) -> Glide.with(getContext()).load(url).into(imageView));
 
         //滑倒顶部时加载历史记录
         mMessagesListAdapter.setLoadMoreListener(this);
@@ -63,16 +80,13 @@ public class DecideFragment extends Fragment implements MessagesListAdapter.OnLo
         View fgDecide = inflater.inflate(R.layout.fragment_decide, container, false);
 
         // 获取消息列表和输入框
-        MessagesList messagesList = fgDecide.findViewById(R.id.messagesList);
-        MessageInput input = fgDecide.findViewById(R.id.input);
+        messagesList = fgDecide.findViewById(R.id.messagesList);
+        input = fgDecide.findViewById(R.id.input);
+
+        markwon = Markwon.builder(getContext()).build();
 
         //发送输入框中的文本，addToStart的第二个参数是列表滚动到底部
-        input.setInputListener(ipt -> {
-            Message message = new Message(USER_ID, mUser, ipt.toString());
-            mMessagesListAdapter.addToStart(message, true);
-            sendMessageToServer("0", ipt.toString());
-            return true;
-        });
+        input.setInputListener(createInputListener());
 
         //小加号按钮点击事件
         input.setAttachmentsListener(() -> {
@@ -96,38 +110,111 @@ public class DecideFragment extends Fragment implements MessagesListAdapter.OnLo
         }, 1000);
     }
 
-    /**
-     * 发送消息到服务器
-     *
-     * @param userId  用户ID
-     * @param message 消息内容
-     */
-    private void sendMessageToServer(String userId, String message) {
-        // 发送消息到服务器
-        ChatApi chatApi = RetrofitClient.getInstance().create(ChatApi.class);
-        ChatRequest chatRequest = new ChatRequest(userId, message);
+    // 修改后的消息发送逻辑（带状态控制）
+    private void sendMessageToServer(String message) {
+        // 禁用输入控件
+        input.setInputListener(null);
+        input.setEnabled(false);
 
-        // 使用Retrofit发送请求
-        chatApi.sendMessage(chatRequest).enqueue(new retrofit2.Callback<ChatResponse>() {
+        String aiMsgId = "ai_" + System.currentTimeMillis();
+        // 创建占位消息并获取引用
+        Message placeholderMsg = new Message(
+                aiMsgId,
+                mAiAssistant,
+                "思考中");
+
+        mMessagesListAdapter.addToStart(placeholderMsg, true);
+
+        Map<String, String> params = new HashMap<>();
+
+        params.put("query", message);
+        params.put("user_id", SharedDataUtils.getLoginUser().getId().toString());
+
+        chatApi.sendMessageStream(params).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(retrofit2.Call<ChatResponse> call, retrofit2.Response<ChatResponse> response) {
-                if (response.isSuccessful()) {
-                    // 处理服务器返回的消息
-                    ChatResponse chatResponse = response.body();
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    new Thread(() -> {
+                        try (BufferedReader reader = new BufferedReader(
+                                new InputStreamReader(response.body().source().inputStream(), StandardCharsets.UTF_8))) {
 
-                    if (chatResponse != null) {
-                        String reply = chatResponse.getReply();
-                        mMessagesListAdapter.addToStart(new Message(AI_ASSISTANT_ID, mAiAssistant, reply), true);
-                        ;
-                    }
+                            StringBuilder content = new StringBuilder();
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+
+                                for (char ch : line.toCharArray()) {
+                                    content.append(ch);
+
+                                    // 更新指定消息内容;
+                                    updateMessageContent(aiMsgId, content.toString());
+
+                                    try {
+                                        Thread.sleep(100);
+                                    } catch (InterruptedException e) {
+                                        Thread.currentThread().interrupt();
+                                    }
+                                }
+
+                            }
+
+                            // 最终处理
+                            completeMessage(aiMsgId, content.toString());
+                        } catch (IOException e) {
+                            handleError(aiMsgId);
+                        }
+                    }).start();
                 }
             }
 
             @Override
-            public void onFailure(retrofit2.Call<ChatResponse> call, Throwable t) {
-                // 处理错误
-                t.printStackTrace();
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                handleError(aiMsgId);
             }
         });
+    }
+
+    // 消息更新方法
+    private void updateMessageContent(String msgId, String newContent) {
+        requireActivity().runOnUiThread(() -> {
+            // 2. 创建新消息对象（保持原ID）
+            Message updatedMsg = new Message(
+                    msgId,
+                    mAiAssistant,
+                    newContent,
+                    new Date()
+            );
+            // 3. 替换消息并刷新
+            mMessagesListAdapter.update(updatedMsg);
+
+        });
+    }
+
+    // 完成处理
+    private void completeMessage(String msgId, String finalContent) {
+        requireActivity().runOnUiThread(() -> {
+            // 移除加载动画
+            updateMessageContent(msgId, finalContent);
+            input.setEnabled(true);
+            input.setInputListener(createInputListener()); // 重新设置监听
+        });
+    }
+
+    // 错误处理
+    private void handleError(String msgId) {
+        requireActivity().runOnUiThread(() -> {
+            updateMessageContent(msgId, "请求失败，请重试");
+            input.setEnabled(true);
+            input.setInputListener(createInputListener());
+        });
+    }
+
+    // 输入监听工厂方法
+    private MessageInput.InputListener createInputListener() {
+        return input -> {
+            Message message = new Message("msg_" + System.currentTimeMillis(), mUser, input.toString());
+            mMessagesListAdapter.addToStart(message, true);
+            sendMessageToServer(input.toString());
+            return true;
+        };
     }
 }

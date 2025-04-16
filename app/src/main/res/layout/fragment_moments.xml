@@ -1,30 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@drawable/bg_gradient"
+    android:fitsSystemWindows="true"
+    android:paddingTop="?android:attr/actionBarSize">
 
-    <Button
-        android:id="@+id/btn_select_image"
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select Image"/>
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="16dp"
+        android:background="#20FFFFFF"
+        android:drawablePadding="4dp"
+        android:gravity="center_horizontal"
+        android:lineSpacingMultiplier="1.2"
+        android:paddingVertical="8dp"
+        android:text="有什么想分享的图片，可以告诉小影哦~"
+        android:textColor="@color/primaryText"
+        android:textSize="16sp" />
 
-    <Button
-        android:id="@+id/btn_upload"
+    <ImageView
+        android:id="@+id/ivSeasonStrip"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Upload Image"
-        android:layout_marginTop="8dp"/>
+        android:layout_height="5dp"
+        android:alpha="0.3"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/spring"
+        android:contentDescription="季节装饰条"/>
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:max="100"
-        android:progress="0"/>
+        android:layout_height="match_parent"
+        android:paddingVertical="16dp"
+        android:paddingHorizontal="24dp">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:divider="@drawable/list_divider"
+            android:showDividers="beginning">
+
+            <!-- 图片预览容器 -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/list_background">
+
+                <ImageView
+                    android:id="@+id/iv_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    android:contentDescription="图片预览"
+                    android:alpha="0.9"/>
+
+
+                <!-- 上传状态指示 -->
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_centerInParent="true"
+                    android:indeterminateDrawable="@drawable/progress_ring"
+                    android:visibility="gone"/>
+
+                <!-- 装饰性图标 -->
+                <ImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_centerInParent="true"
+                    android:alpha="0.2"
+                    android:src="@mipmap/ic_photo_placeholder"
+                    android:contentDescription="装饰图标"/>
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/btn_download"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="下载新版图片"
+                android:layout_marginTop="16dp"/>
+
+            <!-- 上传操作区 -->
+            <Button
+                android:id="@+id/btn_upload"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/button_bg"
+                android:text="选择并上传图片"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:letterSpacing="0.02"/>
+
+            <!-- 分享按钮组 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal"
+                android:background="@drawable/list_background"
+                android:divider="@drawable/divider_width"
+                android:showDividers="middle"
+                android:paddingVertical="8dp"
+                android:baselineAligned="false">
+
+                <!-- 朋友圈 -->
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_share_moment"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_outline_bg"
+                    android:text="朋友圈"
+                    android:textColor="@color/colorPrimary"
+                    android:visibility="gone"
+                    android:drawableStart="@mipmap/ic_wechat_moment"
+                    android:drawablePadding="2dp"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"/>
+
+                <!-- 微信好友 -->
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_share_wechat"
+                    android:layout_width="73dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_outline_bg"
+                    android:drawableStart="@mipmap/ic_wechat"
+                    android:drawablePadding="2dp"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="微信"
+                    android:textColor="@color/colorPrimary"
+                    android:visibility="gone" />
+
+                <!-- QQ好友 -->
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btn_share_qq"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_outline_bg"
+                    android:text="QQ"
+                    android:textColor="@color/colorPrimary"
+                    android:visibility="gone"
+                    android:drawableStart="@mipmap/ic_qq"
+                    android:drawablePadding="2dp"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>

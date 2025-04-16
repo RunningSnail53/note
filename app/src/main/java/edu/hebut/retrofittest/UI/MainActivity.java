@@ -6,6 +6,7 @@ package edu.hebut.retrofittest.UI;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -21,6 +22,10 @@ import edu.hebut.retrofittest.UI.fragment.AnalysisFragment;
 import edu.hebut.retrofittest.UI.fragment.DecideFragment;
 import edu.hebut.retrofittest.UI.fragment.HomeFragment;
 import edu.hebut.retrofittest.UI.fragment.MomentsFragment;
+import edu.hebut.retrofittest.Util.SharedDataUtils;
+import edu.hebut.retrofittest.supabase.dao.UserDao;
+import edu.hebut.retrofittest.supabase.entity.User;
+
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -28,15 +33,16 @@ import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener{
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     public static String login_user;
     private static String path = "/sdcard/Memo/";// sd路径
     private static final int TIME_INTERVAL = 2000;
     private long mBackPressed;
     private ViewPager vpMain;
-    private List<Fragment> fragments = new ArrayList<>();
-    private TextView[] tvOptions = new TextView[4];
+    private final List<Fragment> fragments = new ArrayList<>();
+    private final TextView[] tvOptions = new TextView[4];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +51,9 @@ public class MainActivity extends AppCompatActivity
         tvOptions[1] = findViewById(R.id.tvAnalysis);
         tvOptions[2] = findViewById(R.id.tvDevice);
         tvOptions[3] = findViewById(R.id.tvMoment);
-        login_user = getSharedPreferences("login", MODE_PRIVATE).getString("login_user", "");
+        login_user = SharedDataUtils.getLoginUser().getName();
 //        nav_selected = 2;
-        setTitle(login_user+"的记事本");
+        setTitle(login_user + "的记事本");
         vpMain = findViewById(R.id.vpMain);
         fragments.add(new HomeFragment());
         fragments.add(new AnalysisFragment());
@@ -75,6 +81,10 @@ public class MainActivity extends AppCompatActivity
                 resetTabs();
                 tvOptions[i].setBackgroundResource(R.drawable.shape_bg);
                 tvOptions[i].setTextColor(Color.parseColor("#FFFFFF"));
+                if (i == 1) {
+                    ((AnalysisFragment) fragments.get(i)).getSummary();
+                    ((AnalysisFragment) fragments.get(i)).playChartAnimations();
+                }
             }
 
             @Override
@@ -84,12 +94,9 @@ public class MainActivity extends AppCompatActivity
         });
         for (int i = 0; i < 4; i++) {
             final int finalI = i;
-            tvOptions[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    resetTabs();
-                    vpMain.setCurrentItem(finalI,true);
-                }
+            tvOptions[i].setOnClickListener(view -> {
+                resetTabs();
+                vpMain.setCurrentItem(finalI, true);
             });
         }
         tvOptions[0].setBackgroundResource(R.drawable.shape_bg);
@@ -118,7 +125,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -134,7 +140,6 @@ public class MainActivity extends AppCompatActivity
 
         return super.onContextItemSelected(item);
     }
-
 
 
     @Override

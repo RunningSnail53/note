@@ -13,6 +13,10 @@ public class NoteBean implements Serializable {
     private int mark;
     private String createTime;
     private String updateTime;
+
+
+
+    private Long ownerId;
     private String owner;
     private String year;
     private String month;
@@ -23,11 +27,20 @@ public class NoteBean implements Serializable {
     private int weather;
     private List<String> picPaths;
 
+    public List<String> getOriginPicPaths() {
+        return originPicPaths;
+    }
+
+    private List<String> originPicPaths;
+
     public List<String> getPicPaths() {
         return picPaths;
     }
 
     public void setPicPaths(List<String> picPaths) {
+        if(originPicPaths == null){
+            originPicPaths = picPaths;
+        }
         this.picPaths = picPaths;
     }
 
@@ -148,5 +161,13 @@ public class NoteBean implements Serializable {
 
     public void setMonth(String month) {
         this.month = month;
+    }
+
+    public long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(long ownerId) {
+        this.ownerId = ownerId;
     }
 }

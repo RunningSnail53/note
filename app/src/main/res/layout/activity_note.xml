@@ -1,145 +1,246 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_new"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="4dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    <!-- 季节背景图 -->
     <ImageView
         android:id="@+id/ivSeason"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:alpha="0.3"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:scaleType="fitXY"
-        android:src="@mipmap/winter" />
+        android:src="@mipmap/spring" />
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:ellipsize="end"
-            android:hint="请输入标题"
-            android:maxLines="1"
-            android:padding="@dimen/activity_margin_16"
-            android:textColor="@color/grey_700"
-            android:textSize="@dimen/text_size_18" />
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="right"
-            android:orientation="horizontal"
-            android:paddingLeft="@dimen/activity_margin_16"
-            android:paddingRight="@dimen/activity_margin_16">
+            android:orientation="vertical"
+            android:padding="8dp">
 
+            <!-- 标题区标签 -->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
-                android:entries="@array/note_mind"
-                android:textColor="@color/grey_800"
-                android:textSize="@dimen/text_size_14" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
-                android:entries="@array/note_type"
-                android:textColor="@color/grey_800"
-                android:textSize="@dimen/text_size_14" />
-
-            <TextView
-                android:id="@+id/tvUpdate"
+                android:paddingLeft="8dp"
+                android:text="🔖 标题区"
+                android:textColor="@color/purplePrimary"
                 android:textSize="12sp"
-                android:textColor="#FF0000"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+                android:textStyle="bold" />
 
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            >
-
-            <ImageView
-                android:id="@+id/ivMind"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_centerInParent="true"
-                android:layout_margin="10dp"
-                android:alpha="0.5"
-                android:src="@mipmap/mind0" />
-
-            <androidx.emoji.widget.EmojiTextView
-                android:id="@+id/tv_note_content"
+            <!-- 标题输入 -->
+            <TextView
+                android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@null"
-                android:gravity="top"
-                android:hint="请输入内容"
-                android:padding="@dimen/activity_margin_16"
-                android:textColor="@color/black"
-                android:textSize="@dimen/text_size_16" />
-        </RelativeLayout>
+                android:ellipsize="end"
+                android:gravity="center"
+                android:hint="请输入标题"
+                android:maxLines="1"
+                android:padding="16dp"
+                android:textColor="@color/nav_active"
+                android:textColorHint="@color/edittext_hint"
+                android:textSize="24sp"
+                android:textStyle="bold" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="vertical">
-
-
+            <!-- 元信息标签 -->
             <TextView
-                android:id="@+id/tvLink"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#0000FF"
-                android:textSize="14sp"
-                 />
-        </LinearLayout>
+                android:layout_marginTop="8dp"
+                android:paddingLeft="8dp"
+                android:text="🏷️ 元信息"
+                android:textColor="@color/purplePrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-
-            <Button
-                android:id="@+id/btnPlay"
-                android:layout_width="wrap_content"
+            <!-- 元信息内容 -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="播放语音"
-                android:visibility="gone" />
-        </LinearLayout>
+                android:gravity="right"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:drawableLeft="@drawable/ic_mood"
+                    android:drawablePadding="4dp"
+                    android:textColor="@color/nav_inactive"
+                    android:textSize="14sp" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:drawableLeft="@drawable/ic_category"
+                    android:drawablePadding="4dp"
+                    android:textColor="@color/nav_inactive"
+                    android:textSize="14sp" />
 
-            <Button
-                android:id="@+id/btnPlayMusic"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/tvUpdate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_time"
+                    android:drawablePadding="4dp"
+                    android:textColor="@color/nav_inactive"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- 内容区标签 -->
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="播放音乐"
-                android:visibility="gone" />
-        </LinearLayout>
+                android:layout_marginTop="8dp"
+                android:paddingLeft="8dp"
+                android:text="📝 内容区"
+                android:textColor="@color/purplePrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvData"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dp" />
-    </LinearLayout>
-</RelativeLayout>
+            <!-- 内容编辑区 -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp">
+
+                <ImageView
+                    android:id="@+id/ivMind"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_centerInParent="true"
+                    android:layout_margin="10dp"
+                    android:alpha="0.5"
+                    android:src="@mipmap/mind0" />
+
+                <androidx.emoji.widget.EmojiTextView
+                    android:id="@+id/tv_note_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:gravity="top"
+                    android:hint="请输入内容"
+                    android:padding="16dp"
+                    android:textColor="@color/nav_active"
+                    android:textColorHint="@color/edittext_hint"
+                    android:textSize="16sp" />
+            </RelativeLayout>
+
+            <!-- 链接区标签 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingLeft="8dp"
+                android:text="🔗 链接区"
+                android:textColor="@color/purplePrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- 链接内容 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:background="@color/purpleRipple"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvLink"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_link"
+                    android:drawablePadding="8dp"
+                    android:padding="12dp"
+                    android:textColor="@color/linkPurple"
+                    android:textSize="14sp"
+                    android:textStyle="italic" />
+            </LinearLayout>
+
+            <!-- 操作区标签 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingLeft="8dp"
+                android:text="🎛️ 操作区"
+                android:textColor="@color/purplePrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- 操作按钮 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <Button
+                    android:id="@+id/btnPlay"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_oval_button"
+                    android:text="播放语音"
+                    android:textColor="@android:color/white"
+                    android:visibility="gone" />
+
+                <Button
+                    android:id="@+id/btnPlayMusic"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_oval_button"
+                    android:text="播放音乐"
+                    android:textColor="@android:color/white"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- 数据区标签 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingLeft="8dp"
+                android:text="📦 图片区"
+                android:textColor="@color/purplePrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- 数据列表 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvData"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp" />
+        </LinearLayout>
+    </ScrollView>
+    </androidx.cardview.widget.CardView>
+</FrameLayout>
+

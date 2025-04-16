@@ -1,99 +1,113 @@
 package edu.hebut.retrofittest.UI.fragment;
 
+import static android.app.Activity.RESULT_OK;
+
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
-import java.io.ByteArrayOutputStream;
+import com.bumptech.glide.Glide;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
 
+import edu.hebut.ActivityLifeCycle.supabaseUtil.SupabaseStorageService;
+import edu.hebut.ActivityLifeCycle.supabaseUtil.UploadResponse;
 import edu.hebut.retrofittest.R;
-import okhttp3.Interceptor;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
-import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.Body;
-import retrofit2.http.Header;
-import retrofit2.http.POST;
-import retrofit2.http.PUT;
-import retrofit2.http.Path;
+import edu.hebut.retrofittest.Util.NumberManager;
 
 public class MomentsFragment extends Fragment {
-    private static final int PICK_IMAGE_REQUEST = 101;
-    private static final String SUPABASE_URL = "https://whkjurdnvqfjnuztizew.supabase.co";
-    private static final String SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indoa2p1cmRudnFmam51enRpemV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI4NzA3MzUsImV4cCI6MjA1ODQ0NjczNX0.RT4sYBdaVozuaVKKWJq7_ZmiBagXj4Q1_50ZG23AIX0";
+    public static final int PICK_IMAGE_REQUEST = 1001;
+    private static final String WECHAT_PACKAGE = "com.tencent.mm";
+    private static final String SHARE_TEXT = "分享我的精彩瞬间！"; // 统一文案
+    private static final String WECHAT_FRIEND_CLASS = "com.tencent.mm.ui.tools.ShareImgUI";
+    private static final String WECHAT_MOMENT_CLASS = "com.tencent.mm.ui.tools.ShareToTimeLineUI";
+    private static final String QQ_PACKAGE = "com.tencent.mobileqq";
 
+    private Button btnUpload;
+    private Button btnShareMoment;
+    private Button btnShareWechat;
+    private Button btnShareQQ;
     private ProgressBar progressBar;
-    private SupabaseStorageApi storageApi;
+    private NumberManager numberManager;
+    private int currentFileNumber;
+
+    // 临时文件
+    private ImageView ivPreview;
+    private File cachedImageFile;
     private Uri selectedImageUri;
+
+    private Button btnDownload;
+    private String uploadedFileName;
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_moments, container, false);
 
-        // 初始化UI组件
-        Button btnSelectImage = view.findViewById(R.id.btn_select_image);
-        Button btnUpload = view.findViewById(R.id.btn_upload);
-        progressBar = view.findViewById(R.id.progress_bar);
+        // 初始化视图
+        btnUpload = view.findViewById(R.id.btn_upload);
+        btnShareMoment = view.findViewById(R.id.btn_share_moment);
+        btnShareWechat = view.findViewById(R.id.btn_share_wechat);
+        btnShareQQ = view.findViewById(R.id.btn_share_qq);
+        progressBar = view.findViewById(R.id.progressBar);
+        ivPreview = view.findViewById(R.id.iv_preview);
+        btnDownload = view.findViewById(R.id.btn_download);
+        btnDownload.setOnClickListener(v -> downloadImage());
+        numberManager = new NumberManager(requireContext());
 
-        // 初始化Retrofit
-        initRetrofit();
-
-        btnSelectImage.setOnClickListener(v -> openFileChooser());
-        btnUpload.setOnClickListener(v -> uploadImage());
-
+        setupClickListeners();
         return view;
     }
 
-    private void initRetrofit() {
-        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+    private void setupClickListeners() {
+        // 原上传按钮
+        btnUpload.setOnClickListener(v -> openImagePicker());
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(chain -> {
-                    Request original = chain.request();
-                    Request request = original.newBuilder()
-                            .header("Authorization", "Bearer " + SUPABASE_KEY)
-                            .header("apikey", SUPABASE_KEY) // 添加这行
-                            .build();
-                    return chain.proceed(request);
-                })
-                .addInterceptor(loggingInterceptor)
-                .build();
+        // 朋友圈分享按钮
+        btnShareMoment.setOnClickListener(v -> {
+            copyToClipboard(SHARE_TEXT);
+            try {
+                shareToWeChatMoment(cachedImageFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(SUPABASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        // 微信好友分享按钮
+        btnShareWechat.setOnClickListener(v -> {
+            copyToClipboard(SHARE_TEXT);
+            shareToWeChatFriend(cachedImageFile);
+        });
 
-        storageApi = retrofit.create(SupabaseStorageApi.class);
+        // QQ好友分享按钮
+        btnShareQQ.setOnClickListener(v -> {
+            copyToClipboard(SHARE_TEXT);
+            shareToQQ(cachedImageFile);
+        });
     }
 
-    private void openFileChooser() {
+    private void openImagePicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(intent, PICK_IMAGE_REQUEST);
@@ -102,130 +116,245 @@ public class MomentsFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null) {
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             selectedImageUri = data.getData();
-            Toast.makeText(getContext(), "Image selected", Toast.LENGTH_SHORT).show();
+            showPreview(selectedImageUri);  // 新增预览方法
+            uploadImageToSupabase();
         }
     }
 
-    private void uploadImage() {
-        if (selectedImageUri == null) {
-            Toast.makeText(getContext(), "Please select an image first", Toast.LENGTH_SHORT).show();
+    private void showPreview(Uri imageUri) {
+        try {
+            // 使用Glide加载图片（推荐）
+            Glide.with(this)
+                    .load(imageUri)
+                    .into(ivPreview);
+
+
+            ivPreview.setVisibility(View.VISIBLE);
+        } catch (Exception e) {
+            showToast("图片加载失败: " + e.getMessage());
+        }
+    }
+
+    private void uploadImageToSupabase() {
+        showLoading(true);
+
+        new Thread(() -> {
+            try {
+                // 获取新序号（原子操作）
+                currentFileNumber = numberManager.getAndIncrement();
+
+                String fileName = "share" + currentFileNumber + ".jpg";
+
+                // 创建临时文件（使用新文件名）
+                File tempFile = createNumberedTempFile(selectedImageUri, fileName);
+
+                // 使用Supabase工具类上传
+                SupabaseStorageService service = new SupabaseStorageService();
+                UploadResponse response = service.uploadImage(
+                        "share",
+                        fileName,
+                        tempFile.getAbsolutePath()
+                );
+
+                requireActivity().runOnUiThread(() -> {
+                    showLoading(false);
+                    if (response != null) {
+                        handleUploadSuccess(tempFile,fileName);
+                    } else {
+                        numberManager.resetCounter();
+                        showToast("上传失败");
+                    }
+                });
+
+            } catch (Exception e) {
+                requireActivity().runOnUiThread(() -> {
+                    numberManager.resetCounter();
+                    showLoading(false);
+                    showToast("上传出错: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    private File createNumberedTempFile(Uri uri, String fileName) throws IOException {
+        InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
+
+        // 创建带编号的临时文件
+        File targetFile = new File(requireContext().getCacheDir(), fileName);
+
+        try (FileOutputStream fos = new FileOutputStream(targetFile)) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+            }
+        }
+        return targetFile;
+    }
+
+    private void downloadImage() {
+        if (uploadedFileName == null) {
+            showToast("请先上传图片");
             return;
         }
-        String fileName = UUID.randomUUID().toString() + ".jpg";
 
-        try {
-            InputStream inputStream = requireContext().getContentResolver().openInputStream(selectedImageUri);
-            byte[] bytes = toByteArray(inputStream);
+        showLoading(true);
+        new Thread(() -> {
+            try {
+                String newFileName = "New" + uploadedFileName;
+                File targetFile = new File(requireContext().getCacheDir(), newFileName);
 
-            // 创建带有进度监听的RequestBody
-            RequestBody requestBody = new ProgressRequestBody(
-                    RequestBody.create(MediaType.parse("image/*"), bytes),
-                    (bytesWritten, totalBytes) -> {
-                        int progress = (int) ((100 * bytesWritten) / totalBytes);
-                        new Handler(Looper.getMainLooper()).post(() ->
-                                progressBar.setProgress(progress));
-                    }
-            );
+                boolean success = new SupabaseStorageService().getImage(
+                        "share",
+                        newFileName,
+                        targetFile.getAbsolutePath()
+                );
 
-            // 调用Supabase存储API（假设使用"photos"存储桶）
-            Call<ResponseBody> call = storageApi.uploadFile(
-                    "photos",
-                    fileName,  // 使用动态生成的文件名
-                    requestBody,
-                    "image/jpeg"
-            );
-
-            call.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.isSuccessful()) {
-                        showToast("Upload successful!");
+                requireActivity().runOnUiThread(() -> {
+                    showLoading(false);
+                    if (success) {
+                        cachedImageFile = targetFile;
+                        Glide.with(MomentsFragment.this)
+                                .load(targetFile)
+                                .into(ivPreview);
+                        showToast("已更新为下载版本：" + newFileName);
                     } else {
-                        showToast("Upload failed: " + response.code());
+                        showToast("下载失败");
                     }
-                    progressBar.setProgress(0);
-                }
+                });
+            } catch (Exception e) {
+                requireActivity().runOnUiThread(() -> {
+                    showLoading(false);
+                    showToast("下载出错：" + e.getMessage());
+                });
+            }
+        }).start();
+    }
 
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    showToast("Error: " + t.getMessage());
-                    progressBar.setProgress(0);
-                }
-            });
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            showToast("Error reading file");
+
+    private void handleUploadSuccess(File imageFile,String fileName) {
+        // 保存临时文件引用;
+        uploadedFileName = fileName;
+        cachedImageFile = imageFile;
+
+        // 显示分享按钮
+        btnShareMoment.setVisibility(View.VISIBLE);
+        btnShareWechat.setVisibility(View.VISIBLE);
+        btnShareQQ.setVisibility(View.VISIBLE);
+
+        Glide.with(this)
+                .load(imageFile)
+                .into(ivPreview);
+    }
+
+    private void cleanCache() {
+        if (cachedImageFile != null && cachedImageFile.exists()) {
+            cachedImageFile.delete();
         }
     }
 
-    private byte[] toByteArray(InputStream input) throws IOException {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        byte[] buffer = new byte[4096];
-        int n;
-        while (-1 != (n = input.read(buffer))) {
-            output.write(buffer, 0, n);
+    private void copyToClipboard(String text) {
+        ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("share_text", text);
+        clipboard.setPrimaryClip(clip);
+        showToast("文案已复制到剪贴板");
+    }
+
+    private void shareToWeChatMoment(File imageFile) throws IOException {
+        if (!isWeChatInstalled() || !isMomentAvailable()) {
+            showToast("请先安装最新版微信");
+            return;
         }
-        return output.toByteArray();
+
+        Uri contentUri = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".provider",
+                imageFile
+        );
+
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(WECHAT_PACKAGE, WECHAT_MOMENT_CLASS));
+        intent.setAction(Intent.ACTION_SEND);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
+    }
+
+    private boolean isWeChatInstalled() {
+        try {
+            requireContext().getPackageManager().getPackageInfo(WECHAT_PACKAGE, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private boolean isMomentAvailable() {
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(WECHAT_PACKAGE, WECHAT_MOMENT_CLASS));
+        return requireContext().getPackageManager().resolveActivity(intent, 0) != null;
+    }
+
+    private void showLoading(boolean show) {
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        btnUpload.setEnabled(!show);
     }
 
     private void showToast(String message) {
-        new Handler(Looper.getMainLooper()).post(() ->
-                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show());
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    // Retrofit接口
-    public interface SupabaseStorageApi {
-        @POST("/storage/v1/object/{bucket}/{path}")
-        Call<ResponseBody> uploadFile(
-                @Path("bucket") String bucket,
-                @Path("path") String path,
-                @Body RequestBody file,
-                @Header("Content-Type") String contentType // 必须显式指定
+    private void shareToWeChatFriend(File imageFile) {
+        if (!isWeChatInstalled()) {
+            showToast("请先安装微信");
+            return;
+        }
+
+        Uri contentUri = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".provider",
+                imageFile
         );
+
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(WECHAT_PACKAGE, WECHAT_FRIEND_CLASS));
+        intent.setAction(Intent.ACTION_SEND);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(intent);
     }
 
-    // 修改后的 ProgressRequestBody 类
-    static class ProgressRequestBody extends RequestBody {
-        private final RequestBody requestBody;
-        private final ProgressListener listener;
-
-        ProgressRequestBody(RequestBody requestBody, ProgressListener listener) {
-            this.requestBody = requestBody;
-            this.listener = listener;
+    private void shareToQQ(File imageFile) {
+        if (!isQQInstalled()) {
+            showToast("请先安装QQ");
+            return;
         }
 
-        @Override
-        public MediaType contentType() {
-            return requestBody.contentType();
-        }
+        Uri contentUri = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".provider",
+                imageFile
+        );
 
-        @Override
-        public void writeTo(okio.BufferedSink sink) throws IOException {
-            // 修复点：使用 Okio.buffer() 包装 ForwardingSink
-            okio.BufferedSink progressSink = okio.Okio.buffer(new okio.ForwardingSink(sink) {
-                long bytesWritten = 0L;
-                long totalBytes = -1L;
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setPackage(QQ_PACKAGE);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(intent, "分享到QQ好友"));
+    }
 
-                @Override
-                public void write(okio.Buffer source, long byteCount) throws IOException {
-                    super.write(source, byteCount);
-                    if (totalBytes == -1) {
-                        totalBytes = contentLength();
-                    }
-                    bytesWritten += byteCount;
-                    listener.onProgress(bytesWritten, totalBytes);
-                }
-            });
-
-            requestBody.writeTo(progressSink);
-            progressSink.flush();
-        }
-
-        interface ProgressListener {
-            void onProgress(long bytesWritten, long totalBytes);
+    private boolean isQQInstalled() {
+        try {
+            requireContext().getPackageManager().getPackageInfo(QQ_PACKAGE, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
         }
     }
 }

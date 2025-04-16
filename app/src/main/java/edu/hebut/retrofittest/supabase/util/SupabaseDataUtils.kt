@@ -5,10 +5,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import io.github.jan.supabase.storage.Storage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import java.io.PrintStream
 import kotlin.time.Duration.Companion.seconds
 
 
@@ -31,15 +28,16 @@ class SupabaseDataUtils {
             }
             return instance!!
         }
+/*        // https://jjnragzbvpqdjrcccgdl.supabase.co/storage/v1/object/public/diary//image12.png
+        fun getPhotoUrl(bucketName: String, fileName: String): String {
+            return "https://jjnragzbvpqdjrcccgdl.supabase.co/storage/v1/object/public/$bucketName//$fileName"
+        }
+
+        fun getMusicUrl(bucketName: String, fileName: String): String {
+            return "https://jjnragzbvpqdjrcccgdl.supabase.co/storage/v1/object/public/$bucketName//$fileName"
+        }*/
+
+
     }
-
-}
-
-suspend fun main() {
-    withContext(Dispatchers.IO) {
-        System.setOut(PrintStream(System.out, true, "UTF-8"))
-    }
-
-    SupabaseDataUtils.getClient()
 
 }
