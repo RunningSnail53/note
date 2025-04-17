@@ -5,6 +5,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import io.github.jan.supabase.storage.Storage
+import io.github.jan.supabase.storage.resumable.SettingsResumableCache
 import kotlinx.serialization.json.Json
 import kotlin.time.Duration.Companion.seconds
 
@@ -12,6 +13,7 @@ import kotlin.time.Duration.Companion.seconds
 class SupabaseDataUtils {
     // 设置一个单例模式获取supabase的实例
     companion object {
+
         private var instance: SupabaseClient? = null
         fun getClient(): SupabaseClient {
             if (instance == null) {
@@ -28,16 +30,6 @@ class SupabaseDataUtils {
             }
             return instance!!
         }
-/*        // https://jjnragzbvpqdjrcccgdl.supabase.co/storage/v1/object/public/diary//image12.png
-        fun getPhotoUrl(bucketName: String, fileName: String): String {
-            return "https://jjnragzbvpqdjrcccgdl.supabase.co/storage/v1/object/public/$bucketName//$fileName"
-        }
-
-        fun getMusicUrl(bucketName: String, fileName: String): String {
-            return "https://jjnragzbvpqdjrcccgdl.supabase.co/storage/v1/object/public/$bucketName//$fileName"
-        }*/
-
-
     }
 
 }

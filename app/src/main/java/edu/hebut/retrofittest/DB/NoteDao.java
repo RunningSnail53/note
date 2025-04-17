@@ -1,16 +1,32 @@
 package edu.hebut.retrofittest.DB;
 
-import android.annotation.SuppressLint;
+import static androidx.core.content.ContentProviderCompat.requireContext;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import edu.hebut.ActivityLifeCycle.supabaseUtil.SupabaseStorageService;
+import edu.hebut.ActivityLifeCycle.supabaseUtil.UploadResponse;
 import edu.hebut.retrofittest.Bean.NoteBean;
+import edu.hebut.retrofittest.MyApp;
 import edu.hebut.retrofittest.Util.DateUtils;
+import edu.hebut.retrofittest.Util.SharedDataUtils;
 import edu.hebut.retrofittest.supabase.dao.MindRecordDao;
 import edu.hebut.retrofittest.supabase.dao.MusicDao;
 import edu.hebut.retrofittest.supabase.dao.NoteDaoKt;
@@ -49,9 +65,33 @@ public class NoteDao {
                     // 插入成功后，处理图片
                     List<CompletableFuture<Unit>> photoFutures = noteBean.getPicPaths().stream()
                             .map(path -> {
+                                AtomicReference<String> fileName = new AtomicReference<>();
+                                new Thread(() -> {
+                                    try {
+                                        // 获取新序号（原子操作）
+                                        String currentFileNumber = UUID.randomUUID().toString();
+                                        fileName.set("image" + currentFileNumber + ".jpg");
+                                        // 创建临时文件（使用新文件名）
+                                        File tempFile = createNumberedTempFile(Uri.parse(path), fileName.get());
+
+                                        // 使用Supabase工具类上传
+                                        SupabaseStorageService service = new SupabaseStorageService();
+                                        UploadResponse response = service.uploadImage(
+                                                "diary",
+                                                fileName.get(),
+                                                tempFile.getAbsolutePath()
+                                        );
+
+                                    } catch (Exception e) {
+                                    }
+                                }).start();
+
                                 Photo photo = new Photo();
                                 photo.setNote_id(noteBean.getId());
-                                photo.decodeUrl(path);
+                                photo.setBucket_name("diary");
+                                photo.setObject_name(fileName.get());
+                                SharedDataUtils.init(SharedDataUtils.getLoginUser()).thenAccept(r -> {
+                                });
                                 return PhotoDao.insertPhoto(photo);
                             })
                             .collect(Collectors.toList());
@@ -75,12 +115,17 @@ public class NoteDao {
         // 2. 等待所有关联数据删除完成，再删除 Note
         return CompletableFuture.allOf(deletePhotos, deleteMusic, deleteMindRecords)
                 .thenCompose(ignored -> NoteDaoKt.deleteNoteById(noteId))
-                .thenApply(ret -> 1) // 成功返回 1
+                .thenApply(ret -> {
+                    SharedDataUtils.init(SharedDataUtils.getLoginUser()).thenAccept(r -> {
+                    });
+                    return 1;
+                }) // 成功返回 1
                 .exceptionally(ex -> {
                     System.err.println("Failed to delete note: " + ex.getMessage());
                     return -1; // 失败返回 -1
                 });
     }
+
     public CompletableFuture<Void> updateNote(NoteBean noteBean) {
         // 1. 构造 Note 对象
         Note note = new Note();
@@ -103,12 +148,40 @@ public class NoteDao {
                     // 3. 异步插入或更新图片（并行执行）
                     List<CompletableFuture<Unit>> photoFutures = noteBean.getPicPaths().stream()
                             .map(path -> {
+
+                                AtomicReference<String> fileName = new AtomicReference<>();
+                                new Thread(() -> {
+                                    try {
+                                        // 获取新序号（原子操作）
+                                        String currentFileNumber = UUID.randomUUID().toString();
+                                        fileName.set("image" + currentFileNumber + ".jpg");
+                                        // 创建临时文件（使用新文件名）
+                                        File tempFile = createNumberedTempFile(Uri.parse(path), fileName.get());
+
+                                        // 使用Supabase工具类上传
+                                        SupabaseStorageService service = new SupabaseStorageService();
+                                        UploadResponse response = service.uploadImage(
+                                                "diary",
+                                                fileName.get(),
+                                                tempFile.getAbsolutePath()
+                                        );
+                                    } catch (Exception e) {
+                                    }
+                                }).start();
+
                                 Photo photo = new Photo();
                                 photo.setNote_id(noteBean.getId());
-                                photo.decodeUrl(path);
+                                photo.setBucket_name("diary");
+                                photo.setObject_name(fileName.get());
+
+                                SharedDataUtils.init(SharedDataUtils.getLoginUser()).thenAccept(r -> {
+                                });
                                 return PhotoDao.insertPhoto(photo);
                             })
                             .collect(Collectors.toList());
+
+                    SharedDataUtils.init(SharedDataUtils.getLoginUser()).thenAccept(ret -> {
+                    });
 
                     return CompletableFuture.allOf(photoFutures.toArray(new CompletableFuture[0]));
                 })
@@ -248,5 +321,21 @@ public class NoteDao {
                     System.err.println("Failed to query notes: " + ex.getMessage());
                     return Collections.emptyList(); // 返回空列表或抛出异常
                 });
+    }
+
+    private File createNumberedTempFile(Uri uri, String fileName) throws IOException {
+        InputStream inputStream = MyApp.getAppContext().getContentResolver().openInputStream(uri);
+
+        // 创建带编号的临时文件
+        File targetFile = new File(MyApp.getAppContext().getCacheDir(), fileName);
+
+        try (FileOutputStream fos = new FileOutputStream(targetFile)) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+            }
+        }
+        return targetFile;
     }
 }

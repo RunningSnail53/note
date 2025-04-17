@@ -61,6 +61,7 @@ public class NoteActivity extends AppCompatActivity {
         init();
         initEvent();
 //        btnPlayMusic.performClick();
+        // TODO: 2020/10/21 获取音乐路径
     }
 
     private void initEvent() {

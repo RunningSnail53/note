@@ -274,7 +274,7 @@ public class AnalysisFragment extends Fragment {
 
             // 控制显示速度（在后台线程睡眠）
             try {
-                Thread.sleep(50);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

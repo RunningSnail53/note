@@ -1,6 +1,8 @@
 package edu.hebut.retrofittest.UI.fragment;
 
 
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -12,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.stfalcon.chatkit.messages.MessageHolders;
 import com.stfalcon.chatkit.messages.MessageInput;
 import com.stfalcon.chatkit.messages.MessagesList;
 import com.stfalcon.chatkit.messages.MessagesListAdapter;
@@ -20,11 +23,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.hebut.retrofittest.Adapter.MyMessagesListAdapter;
 import edu.hebut.retrofittest.R;
+import edu.hebut.retrofittest.Util.EnCodeUtils;
 import edu.hebut.retrofittest.Util.SharedDataUtils;
 import edu.hebut.retrofittest.chat.client.RetrofitClient;
 import edu.hebut.retrofittest.chat.model.Message;
@@ -38,35 +42,40 @@ import retrofit2.Response;
 
 public class DecideFragment extends Fragment implements MessagesListAdapter.OnLoadMoreListener {
 
-    private static final String USER_ID = "0";
-    private static final String AI_ASSISTANT_ID = "1";
-    private static final String AI_ASSISTANT_AVATAR = "https://img.6tu.com/2021/11/20211103054112556.jpg";
-
     private User mUser;
     private User mAiAssistant;
 
     private ChatApi chatApi;
-    MessagesListAdapter<Message> mMessagesListAdapter;
+    MyMessagesListAdapter mMessagesListAdapter;
     private MessagesList messagesList;
     private MessageInput input;
-    private Markwon markwon;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mUser = new User(USER_ID, "User", null, true);
+        mUser = new User("0", "User", null, true);
 
-        mAiAssistant = new User(AI_ASSISTANT_ID, "AiAssistant", AI_ASSISTANT_AVATAR, true);
+
+        String AI_ASSISTANT_AVATAR = "data:image/png;base64," +  EnCodeUtils.encodeImage(BitmapFactory.decodeResource(getResources(), R.mipmap.label));
+
+        mAiAssistant = new User("1", "AiAssistant", AI_ASSISTANT_AVATAR, true);
 
         chatApi = RetrofitClient.getInstance().create(ChatApi.class);
+
+        MessagesListAdapter.HoldersConfig holdersConfig = new MessagesListAdapter.HoldersConfig();
+
+        holdersConfig.setIncomingTextLayout(R.layout.item_custom_incoming_text_message);
 
         /*
          * senderId:自己的id，用于区分自己和对方，控制消息气泡的位置。
          * imageLoader:图像加载器
          *
          * */
-        mMessagesListAdapter = new MessagesListAdapter<Message>(USER_ID, (imageView, url, payload) -> Glide.with(getContext()).load(url).into(imageView));
+        mMessagesListAdapter = new MyMessagesListAdapter("0",
+                /*holdersConfig,*/
+                (imageView, url, payload)
+                        -> Glide.with(getContext()).load(url).into(imageView));
 
         //滑倒顶部时加载历史记录
         mMessagesListAdapter.setLoadMoreListener(this);
@@ -83,15 +92,21 @@ public class DecideFragment extends Fragment implements MessagesListAdapter.OnLo
         messagesList = fgDecide.findViewById(R.id.messagesList);
         input = fgDecide.findViewById(R.id.input);
 
-        markwon = Markwon.builder(getContext()).build();
-
         //发送输入框中的文本，addToStart的第二个参数是列表滚动到底部
         input.setInputListener(createInputListener());
 
         //小加号按钮点击事件
         input.setAttachmentsListener(() -> {
+            String aiMsgId = "ai_" + System.currentTimeMillis();
+            // 创建占位消息并获取引用
+            Message placeholderMsg = new Message(
+                    aiMsgId,
+                    mAiAssistant,
+                    "思考中\n");
+
             // TODO: 处理附件点击事件
-            mMessagesListAdapter.addToStart(new Message(AI_ASSISTANT_ID, mAiAssistant, "添加附件功能待实现"), true);
+            mMessagesListAdapter.addToStart(placeholderMsg, true);
+
         });
 
         // 设置消息列表适配器
@@ -141,20 +156,15 @@ public class DecideFragment extends Fragment implements MessagesListAdapter.OnLo
                             StringBuilder content = new StringBuilder();
                             String line;
                             while ((line = reader.readLine()) != null) {
-
                                 for (char ch : line.toCharArray()) {
                                     content.append(ch);
-
-                                    // 更新指定消息内容;
                                     updateMessageContent(aiMsgId, content.toString());
-
                                     try {
                                         Thread.sleep(100);
                                     } catch (InterruptedException e) {
                                         Thread.currentThread().interrupt();
                                     }
                                 }
-
                             }
 
                             // 最终处理
@@ -176,16 +186,12 @@ public class DecideFragment extends Fragment implements MessagesListAdapter.OnLo
     // 消息更新方法
     private void updateMessageContent(String msgId, String newContent) {
         requireActivity().runOnUiThread(() -> {
-            // 2. 创建新消息对象（保持原ID）
-            Message updatedMsg = new Message(
+            Message currentMessage = new Message(
                     msgId,
                     mAiAssistant,
-                    newContent,
-                    new Date()
+                    newContent
             );
-            // 3. 替换消息并刷新
-            mMessagesListAdapter.update(updatedMsg);
-
+            mMessagesListAdapter.updateMessageContent(currentMessage);
         });
     }
 

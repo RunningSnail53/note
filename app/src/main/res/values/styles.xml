@@ -64,7 +64,24 @@
     </style>
 
 
-
+    <style name="MoodRadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <!-- 隐藏默认圆圈 -->
+        <item name="android:button">@null</item>
+        <!-- 使用自定义背景 -->
+        <item name="android:background">@drawable/radio_selector</item>
+        <!-- 文字样式 -->
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/radio_text_color</item>
+        <!-- 内边距 -->
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <!-- 最小宽度 -->
+        <item name="android:minWidth">64dp</item>
+        <!-- 禁止点击水波纹 -->
+        <item name="android:selectableItemBackgroundBorderless">@null</item>
+    </style>
 
 
 </resources>
